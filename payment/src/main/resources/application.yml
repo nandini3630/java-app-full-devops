@@ -20,3 +20,6 @@ spring:
           json:
             trusted:
               packages: "*" # Trust deserializing the payload from the core service
+            use:
+              type:
+                headers: "false" # Ignore __TypeId__ header from auctionx. Deserialize as Map.

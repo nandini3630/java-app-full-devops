@@ -31,3 +31,6 @@ spring:
           json:
             trusted:
               packages: "*"
+            use:
+              type:
+                headers: "false" # Ignore __TypeId__ header from auctionx. Deserialize as Map.
