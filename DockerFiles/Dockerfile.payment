@@ -26,4 +26,6 @@ COPY --from=builder --chown=swetha:appusers /app/target/payment*.jar app.jar
 
 USER swetha
 
+EXPOSE 8081
+
 CMD ["java","-Xms256m","-Xmx512m","-XX:+UseContainerSupport","-jar","app.jar"]

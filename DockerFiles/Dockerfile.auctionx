@@ -26,4 +26,6 @@ COPY --from=builder --chown=swetha:appusers /app/target/auctionx-0.0.1-SNAPSHOT.
 
 USER swetha
 
+EXPOSE 8080
+
 CMD ["java","-Xms256m","-Xmx512m","-XX:+UseContainerSupport","-jar", "app.jar"]

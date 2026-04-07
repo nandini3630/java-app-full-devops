@@ -26,4 +26,6 @@ COPY --from=builder --chown=swetha:appusers /app/target/notification*.jar app.ja
 
 USER swetha
 
+EXPOSE 8082
+
 CMD ["java","-Xms256m","-Xmx512m","-XX:+UseContainerSupport","-jar","app.jar"]
