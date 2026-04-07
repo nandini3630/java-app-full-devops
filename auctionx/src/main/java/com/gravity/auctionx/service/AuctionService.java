@@ -77,4 +77,33 @@ public class AuctionService {
             throw new IllegalStateException("Someone else placed a bid just before you! Please fetch the latest price and try again.");
         }
     }
+
+    @Transactional(readOnly = true)
+    public java.util.List<AuctionItem> getAllAuctions() {
+        return auctionItemRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public AuctionItem getAuctionById(Long id) {
+        return auctionItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Auction Item not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<Bid> getBidHistory(Long auctionItemId) {
+        return bidRepository.findByAuctionItemIdOrderByBidTimeDesc(auctionItemId);
+    }
+
+    @Transactional
+    public AuctionItem createAuction(com.gravity.auctionx.dto.AuctionRequest request) {
+        AuctionItem item = AuctionItem.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .startingPrice(request.getStartingPrice())
+                .currentHighestBid(request.getStartingPrice())
+                .endTime(request.getEndTime())
+                .status(AuctionItem.AuctionStatus.ACTIVE)
+                .build();
+        return auctionItemRepository.save(item);
+    }
 }

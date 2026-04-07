@@ -81,6 +81,49 @@ Users should return `id = 1` (vishal_dev) and `id = 2` (nandini_dev). AuctionIte
 
 ---
 
+## PHASE 1.5: Verify the New REST API (Phase 1.1 Additions)
+
+We successfully automated the creation of Users and Auctions via the new
+REST controllers. No more raw SQL needed for testing.
+
+### Test 1 — Register a User via API
+**Method:** `POST`
+**URL:** `http://15.207.20.75:8080/api/users/register`
+**Body (JSON):**
+```json
+{
+  "username": "frontend_dev",
+  "email": "dev@test.com"
+}
+```
+**✅ Expected:** 200 OK with the full User object + ID.
+
+### Test 2 — Create an Auction via API
+**Method:** `POST`
+**URL:** `http://15.207.20.75:8080/api/auctions`
+**Body (JSON):**
+```json
+{
+  "title": "Rolex Submariner",
+  "description": "Vintage 1970 collectors piece",
+  "startingPrice": 5000.00,
+  "endTime": "2026-12-31T23:59:59"
+}
+```
+**✅ Expected:** 200 OK with the full AuctionItem object + ID.
+
+### Test 3 — List All Auctions
+**Method:** `GET`
+**URL:** `http://15.207.20.75:8080/api/auctions`
+**✅ Expected:** 200 OK with a JSON array of all existing auctions.
+
+### Test 4 — Get Single Auction Details
+**Method:** `GET`
+**URL:** `http://15.207.20.75:8080/api/auctions/1`
+**✅ Expected:** 200 OK with details of auction #1.
+
+---
+
 ## PHASE 2: Configure Postman
 
 1. Open Postman → Click **`+`** to open a new request tab.

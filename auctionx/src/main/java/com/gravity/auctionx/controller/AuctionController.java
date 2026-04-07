@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auctions")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AuctionController {
 
     private final AuctionService auctionService;
@@ -55,5 +56,20 @@ public class AuctionController {
             log.error("Unexpected error placing bid", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("System error");
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<java.util.List<com.gravity.auctionx.domain.AuctionItem>> listAuctions() {
+        return ResponseEntity.ok(auctionService.getAllAuctions());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<com.gravity.auctionx.domain.AuctionItem> getAuction(@PathVariable Long id) {
+        return ResponseEntity.ok(auctionService.getAuctionById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<com.gravity.auctionx.domain.AuctionItem> createAuction(@RequestBody com.gravity.auctionx.dto.AuctionRequest req) {
+        return ResponseEntity.ok(auctionService.createAuction(req));
     }
 }
