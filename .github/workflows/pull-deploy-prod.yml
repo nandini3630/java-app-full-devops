@@ -1,0 +1,27 @@
+name: Pull And Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build And Push"]
+    types: [complete]
+    branches: ["main"]
+  
+jobs:
+
+  pull-and-deploy:
+    runs-on: self-hosted
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      
+      - 
+        name: checkout only docker-compose.prod.yml
+        uses: actions/checkout@v4
+        with: 
+          sparse-checkout: |
+            docker-compose.prod.yml
+          sparse-checkout-cone-mode: false
+
+      - 
+        name: up the file
+        runs: docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up -d
