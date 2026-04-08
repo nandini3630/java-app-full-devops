@@ -23,5 +23,5 @@ jobs:
       - 
         name: up the file
         run: |
-          USERNAME=${{ vars.DOCKER_USERNAME }} GIT_SHA=${{ GIT_SHA }}
+          USERNAME=${{ vars.DOCKER_USERNAME }} GIT_SHA=${{ github.event.workflow_run.head_sha }}
           docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up -d
