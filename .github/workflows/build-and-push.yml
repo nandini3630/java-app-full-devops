@@ -7,10 +7,16 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    strategy:
+      matrix:
+        service: [auctionx, payment, notification]
     env:
       GIT_SHA: ${{ github.sha }}
       USERNAME: ${{ vars.DOCKER_USERNAME }}
-    
     
     steps:
       - name: Checkout Code
@@ -28,24 +34,24 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
-      - name: Build and Push
-        run: |
-          docker compose build --no-cache --push
+      - name: Build and Push Service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: DockerFiles/Dockerfile.${{ matrix.service }}
+          push: true
+          target: production
+          tags: |
+            ${{ vars.DOCKER_USERNAME }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ vars.DOCKER_USERNAME }}/${{ matrix.service }}:latest
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            APP_VERSION=${{ vars.APP_VERSION }}
+          sbom: true
+          provenance: true
       
-      - name: Docker Scout Scan (AuctionX)
+      - name: Docker Scout Scan
         uses: docker/scout-action@v1
         with:
           command: quickview,cves
-          image: ${{ vars.DOCKER_USERNAME }}/auctionx:${{ github.sha }}
-      
-      - name: Docker Scout Scan (Payment)
-        uses: docker/scout-action@v1
-        with:
-          command: quickview,cves
-          image: ${{ vars.DOCKER_USERNAME }}/payment:${{ github.sha }}
-      
-      - name: Docker Scout Scan (Notification)
-        uses: docker/scout-action@v1
-        with:
-          command: quickview,cves
-          image: ${{ vars.DOCKER_USERNAME }}/notification:${{ github.sha }}
+          image: ${{ vars.DOCKER_USERNAME }}/${{ matrix.service }}:${{ github.sha }}

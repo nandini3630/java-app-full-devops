@@ -6,9 +6,6 @@ services:
       context: .
       dockerfile: DockerFiles/Dockerfile.auctionx
       target: production
-      attestations:
-        - type=sbom
-        - type=provenance,mode=max
 
   payment:
     image: ${USERNAME}/payment:${GIT_SHA}
@@ -16,9 +13,6 @@ services:
       context: .
       dockerfile: DockerFiles/Dockerfile.payment
       target: production
-      attestations:
-        - type=sbom
-        - type=provenance,mode=max
 
   notification:
     image: ${USERNAME}/notification:${GIT_SHA}
@@ -26,6 +20,3 @@ services:
       context: .
       dockerfile: DockerFiles/Dockerfile.notification
       target: production
-      attestations:
-        - type=sbom
-        - type=provenance,mode=max
