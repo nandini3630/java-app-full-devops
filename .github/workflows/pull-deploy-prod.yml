@@ -24,4 +24,5 @@ jobs:
 
       - 
         name: up the file
-        runs: docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up -d
+        run: |
+          docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up -d
