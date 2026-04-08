@@ -21,10 +21,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '1.0'
-        memory: 512M
-        pids: 100
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+          pids: 100
 
   redis:
     image: redis:7-alpine
@@ -37,10 +38,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '0.25'
-        memory: 512M
-        pids: 50
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+          pids: 50
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -71,10 +73,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '1.0'
-        memory: 512M
-        pids: 50
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+          pids: 50
 
   mailpit:
     image: axllent/mailpit
@@ -86,10 +89,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '0.2'
-        memory: 64M
-        pids: 50
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 64M
+          pids: 50
 
   auctionx:
     image: ${USERNAME}/auctionx:${GIT_SHA}
@@ -113,10 +117,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '1.50'
-        memory: 512M
-        pids: 100
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 512M
+          pids: 100
 
   payment:
     image: ${USERNAME}/payment:${GIT_SHA}
@@ -139,10 +144,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '1.50'
-        memory: 512M
-        pids: 100
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 512M
+          pids: 100
 
   notification:
     image: ${USERNAME}/notification:${GIT_SHA}
@@ -162,10 +168,11 @@ services:
     networks:
       - app-net
     deploy:
-      limits:
-        cpus: '1.50'
-        memory: 512M
-        pids: 100
+      resources:
+        limits:
+          cpus: '1.50'
+          memory: 512M
+          pids: 100
 
 networks:
   app-net:
