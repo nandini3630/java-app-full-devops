@@ -3,7 +3,7 @@ name: Pull And Deploy
 on:
   workflow_run:
     workflows: ["Build And Push"]
-    types: [complete]
+    types: [completed]
     branches: ["main"]
   
 jobs:
@@ -13,7 +13,6 @@ jobs:
 
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      
       - 
         name: checkout only docker-compose.prod.yml
         uses: actions/checkout@v4
