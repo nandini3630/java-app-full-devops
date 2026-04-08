@@ -9,10 +9,6 @@ jobs:
 
   pull-and-deploy:
     runs-on: self-hosted
-    
-    env:
-      USERNAME: vishu0210
-      GIT_SHA: ${{github.event.workflow_run.head_sha}}
 
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
@@ -27,4 +23,5 @@ jobs:
       - 
         name: up the file
         run: |
+          USERNAME=${{ vars.DOCKER_USERNAME }} GIT_SHA=${{ GIT_SHA }}
           docker compose -f docker-compose.prod.yml down -v && docker compose -f docker-compose.prod.yml up -d
