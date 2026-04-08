@@ -11,6 +11,7 @@ jobs:
       GIT_SHA: ${{ github.sha }}
       USERNAME: ${{ vars.DOCKER_USERNAME }}
     
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
