@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { UserPlus, Mail, User, ArrowRight, CheckCircle2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { UserPlus, Mail, User, ArrowRight, ShieldCheck, Zap, Activity } from "lucide-react"
 import { auctionApi } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 
@@ -31,91 +31,123 @@ export default function Register() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[80vh]">
+    <div className="flex items-center justify-center min-h-screen pt-20">
       <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass rounded-3xl p-10 w-full max-w-md border border-glass-border relative overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="glass-panel rounded-lg p-12 w-full max-w-lg border-white/5 relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+        {/* Top Accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary" />
         
-        {success ? (
-          <div className="text-center py-10">
+        <AnimatePresence mode="wait">
+          {success ? (
             <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="w-20 h-20 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-6"
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-12"
             >
-              <CheckCircle2 size={40} className="text-success" />
-            </motion.div>
-            <h2 className="text-3xl font-bold font-outfit mb-4">Welcome, {username}!</h2>
-            <p className="text-text-dim">You're all set to start bidding. Redirecting to auctions...</p>
-          </div>
-        ) : (
-          <>
-            <div className="mb-10 text-center">
-              <div className="w-16 h-16 bg-surface border border-glass-border rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <UserPlus size={32} className="text-primary" />
+              <div className="relative w-24 h-24 mx-auto mb-8">
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute inset-0 bg-success/20 rounded-full blur-xl"
+                />
+                <div className="relative w-full h-full bg-slate-950 border border-success/40 rounded-full flex items-center justify-center">
+                  <ShieldCheck size={40} className="text-success" />
+                </div>
               </div>
-              <h2 className="text-3xl font-bold font-outfit">Join AuctionX</h2>
-              <p className="text-text-dim text-sm mt-3">Register now to place real-time bids and win big.</p>
-            </div>
+              <h2 className="text-4xl font-bold tracking-tighter mb-4 uppercase">Identity Verified</h2>
+              <p className="text-xs font-bold text-text-muted tracking-[0.3em] uppercase">Syncing Session With Global Ledger...</p>
+              
+              {/* Scanline Effect */}
+              <motion.div 
+                initial={{ top: "-10%" }}
+                animate={{ top: "110%" }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                className="absolute left-0 w-full h-px bg-success/40 shadow-[0_0_10px_2px_rgba(52,211,153,0.4)] z-20"
+              />
+            </motion.div>
+          ) : (
+            <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="mb-12">
+                <div className="flex items-center gap-3 mb-4">
+                  <Activity size={16} className="text-primary" />
+                  <span className="text-[10px] font-bold text-text-muted tracking-[0.4em] uppercase">Security Protocol // Initialize</span>
+                </div>
+                <h2 className="text-5xl font-bold tracking-tighter uppercase leading-none">JOIN THE <br /><span className="text-primary italic">NETWORK</span></h2>
+                <p className="text-xs font-bold text-text-muted tracking-widest mt-6 bg-white/5 w-fit px-3 py-1">AUTH_LEVEL: STAND_BY</p>
+              </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Username</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">Operator Designation</label>
+                    <User size={12} className="text-primary/40" />
+                  </div>
                   <input 
                     type="text" 
                     required 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all"
-                    placeholder="john_doe"
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-5 text-lg font-bold font-mono outline-none focus:border-primary transition-all placeholder:text-white/10"
+                    placeholder="IDENTIFIER_01"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">Comm Channel (Email)</label>
+                    <Mail size={12} className="text-secondary/40" />
+                  </div>
                   <input 
                     type="email" 
                     required 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all"
-                    placeholder="john@example.com"
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-5 text-lg font-bold font-mono outline-none focus:border-primary transition-all placeholder:text-white/10"
+                    placeholder="PROTOCOL@NETWORK.COM"
                   />
                 </div>
-              </div>
 
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full btn-primary justify-center h-12 text-md mt-4"
-              >
-                {loading ? "Creating Account..." : "Create Account"}
-                {!loading && <ArrowRight size={18} />}
-              </button>
-            </form>
-          </>
-        )}
+                <div className="pt-6">
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full btn-precision h-16 flex items-center justify-center gap-4 group"
+                  >
+                    {loading ? (
+                      <span className="animate-pulse">AUTHORIZING...</span>
+                    ) : (
+                      <>
+                        <Zap size={18} />
+                        INITIALIZE SESSION
+                        <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              <div className="mt-12 pt-8 border-t border-white/5 flex items-center justify-between">
+                 <div className="flex flex-col">
+                   <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Latency Check</span>
+                   <span className="text-[9px] font-bold text-success font-mono uppercase tracking-widest">Optimized (0.4ms)</span>
+                 </div>
+                 <div className="text-[9px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
+                   <ShieldCheck size={12} className="text-primary" />
+                   E2E Encrypted
+                 </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Decorative Corners */}
+        <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/20" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/20" />
       </motion.div>
-      
-      <style jsx>{`
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .text-center { text-align: center; }
-        .max-w-md { max-width: 28rem; }
-        .space-y-6 > * + * { margin-top: 24px; }
-        .space-y-2 > * + * { margin-top: 8px; }
-        .min-h-\[80vh\] { min-height: 80vh; }
-        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .border-glass-border { border: 1px solid var(--glass-border); }
-        .border-dashed { border-style: dashed; }
-      `}</style>
     </div>
   )
 }

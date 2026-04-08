@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuctionController {
 
     private final AuctionService auctionService;
-    // Spring Boot provides this template to push messages from the server to WebSocket clients
+    // Spring Boot provides this template to push messages from the server to
+    // WebSocket clients
     private final SimpMessagingTemplate messagingTemplate;
     // Producer for our Kafka topic
     private final com.gravity.auctionx.service.AuctionEventProducer eventProducer;
@@ -44,7 +45,8 @@ public class AuctionController {
             // We push the response directly to the Websocket topic. No polling required!
             messagingTemplate.convertAndSend("/topic/auctions/" + id, response);
 
-            // 4. FIRE AND FORGET KAFKA EVENT FOR MICROSERVICES (Fraud Check, Analytics, etc)
+            // 4. FIRE AND FORGET KAFKA EVENT FOR MICROSERVICES (Fraud Check, Analytics,
+            // etc)
             eventProducer.publishBidEvent(response);
 
             return ResponseEntity.ok(response);
@@ -69,7 +71,8 @@ public class AuctionController {
     }
 
     @PostMapping
-    public ResponseEntity<com.gravity.auctionx.domain.AuctionItem> createAuction(@RequestBody com.gravity.auctionx.dto.AuctionRequest req) {
+    public ResponseEntity<com.gravity.auctionx.domain.AuctionItem> createAuction(
+            @RequestBody com.gravity.auctionx.dto.AuctionRequest req) {
         return ResponseEntity.ok(auctionService.createAuction(req));
     }
 }

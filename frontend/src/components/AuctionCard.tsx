@@ -3,34 +3,31 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Timer, ArrowUpRight, TrendingUp } from "lucide-react"
+import { Timer, ArrowUpRight, TrendingUp, ShieldCheck } from "lucide-react"
+import { Auction } from "@/types"
 
-interface AuctionCardProps {
-  id: number
-  title: string
-  description: string
-  currentPrice: number
-  endTime: string
-  status: string
-}
-
-export default function AuctionCard({ id, title, description, currentPrice, endTime, status }: AuctionCardProps) {
+export default function AuctionCard({ id, title, description, currentHighestBid, endTime, status }: Auction) {
   const [timeLeft, setTimeLeft] = useState("")
+  const [progress, setProgress] = useState(100)
 
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime()
       const end = new Date(endTime).getTime()
-      const diff = end - now
-
-      if (diff <= 0) {
-        setTimeLeft("ENDED")
+      const start = end - (24 * 60 * 60 * 1000) // Assume 24h duration for visual progress if not provided
+      const total = end - start
+      const remaining = end - now
+      
+      if (remaining <= 0) {
+        setTimeLeft("EXPIRED")
+        setProgress(0)
         clearInterval(timer)
       } else {
-        const h = Math.floor(diff / (1000 * 60 * 60))
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-        const s = Math.floor((diff % (1000 * 60)) / 1000)
-        setTimeLeft(`${h}h ${m}m ${s}s`)
+        const h = Math.floor(remaining / (1000 * 60 * 60))
+        const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+        const s = Math.floor((remaining % (1000 * 60)) / 1000)
+        setTimeLeft(`${h}H ${m}M ${s}S`)
+        setProgress((remaining / total) * 100)
       }
     }, 1000)
 
@@ -39,68 +36,75 @@ export default function AuctionCard({ id, title, description, currentPrice, endT
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8 }}
       viewport={{ once: true }}
-      className="glass-card rounded-2xl p-6 relative overflow-hidden group"
+      className="glass-panel rounded-lg p-0 relative overflow-hidden group border-white/5 hover:border-primary/30 transition-colors duration-500"
     >
-      {/* Active Badge */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1 bg-primary/20 border border-primary/30 rounded-full">
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-        <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{status}</span>
+      {/* Top Status Bar */}
+      <div className="h-1 w-full bg-slate-800">
+        <motion.div 
+          className="h-full bg-primary"
+          initial={{ width: "100%" }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 1 }}
+        />
       </div>
 
-      <h3 className="text-xl font-bold font-outfit mb-2 group-hover:text-primary transition-colors">{title}</h3>
-      <p className="text-text-dim text-sm line-clamp-2 mb-6 h-10">{description}</p>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="flex flex-col">
-          <span className="text-[10px] uppercase font-bold text-text-dim tracking-widest flex items-center gap-1">
-            <TrendingUp size={12} />
-            Current Bid
-          </span>
-          <span className="text-2xl font-bold text-gradient">${currentPrice.toLocaleString()}</span>
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-1">
+              <ShieldCheck size={12} className="text-primary" />
+              <span className="text-[10px] font-bold text-text-muted tracking-[0.2em] uppercase">Secured Lot #{id}</span>
+            </div>
+            <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">{title}</h3>
+          </div>
+          <div className="px-2 py-1 bg-slate-900 border border-white/10 rounded text-[9px] font-bold text-primary tracking-widest uppercase">
+            {status}
+          </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] uppercase font-bold text-text-dim tracking-widest flex items-center gap-1">
-            <Timer size={12} />
-            Ends In
-          </span>
-          <span className="text-lg font-medium text-text mt-1">{timeLeft}</span>
+
+        <p className="text-text-muted text-xs font-medium leading-relaxed line-clamp-2 mb-8 h-8 italic">
+          &quot;{description}&quot;
+        </p>
+
+        <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5 bg-white/2">
+          <div className="flex flex-col">
+            <span className="text-[9px] uppercase font-bold text-text-muted tracking-widest flex items-center gap-1.5 mb-2">
+              <TrendingUp size={10} className="text-primary" />
+              Current Value
+            </span>
+            <span className="text-2xl font-bold font-mono tracking-tighter text-white">
+              ${currentHighestBid.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex flex-col border-l border-white/5 pl-4">
+            <span className="text-[9px] uppercase font-bold text-text-muted tracking-widest flex items-center gap-1.5 mb-2">
+              <Timer size={10} className="text-secondary" />
+              Time Remaining
+            </span>
+            <span className="text-base font-bold font-mono text-primary">
+              {timeLeft}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <Link 
+            href={`/auction/${id}`} 
+            className="w-full btn-precision justify-center text-[11px] tracking-[0.2em] flex items-center gap-3"
+          >
+            Enter Viewing Room
+            <ArrowUpRight size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </Link>
         </div>
       </div>
 
-      <Link 
-        href={`/auction/${id}`} 
-        className="w-full btn-primary justify-center text-sm"
-      >
-        View Auction
-        <ArrowUpRight size={16} />
-      </Link>
-      
-      <style jsx>{`
-        .glass-card {
-          width: 100%;
-          min-width: 320px;
-        }
-        .text-\[10px\] { font-size: 10px; }
-        .text-gradient {
-          background: linear-gradient(135deg, var(--primary), var(--secondary));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: .5; }
-        }
-      `}</style>
+      {/* Decorative Corners */}
+      <div className="absolute top-1 left-1 w-2 h-2 border-t border-l border-white/20" />
+      <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-white/20" />
     </motion.div>
   )
 }

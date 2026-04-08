@@ -20,6 +20,11 @@ services:
       start_period: 10s
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '1.0'
+        memory: 512M
+        pids: 100
 
   redis:
     image: redis:7-alpine
@@ -31,6 +36,11 @@ services:
       - redis_data:/data
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '0.25'
+        memory: 512M
+        pids: 50
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -60,6 +70,11 @@ services:
       start_period: 30s
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '1.0'
+        memory: 512M
+        pids: 50
 
   mailpit:
     image: axllent/mailpit
@@ -70,12 +85,20 @@ services:
       - 1025:1025
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '0.2'
+        memory: 64M
+        pids: 50
 
   auctionx:
     build:
       context: .
       dockerfile: DockerFiles/Dockerfile.auctionx
       target: production
+      attestations:
+        - type=sbom
+        - type=provenance,mode=max
     container_name: auctionx
     restart: unless-stopped
     environment:
@@ -95,12 +118,20 @@ services:
         condition: service_healthy
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '1.50'
+        memory: 512M
+        pids: 100
 
   payment:
     build:
       context: .
       dockerfile: DockerFiles/Dockerfile.payment
       target: production
+      attestations:
+        - type=sbom
+        - type=provenance,mode=max
     container_name: payment
     restart: unless-stopped
     environment:
@@ -119,12 +150,20 @@ services:
         condition: service_healthy
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '1.50'
+        memory: 512M
+        pids: 100
 
   notification:
     build:
       context: .
       dockerfile: DockerFiles/Dockerfile.notification
       target: production
+      attestations:
+        - type=sbom
+        - type=provenance,mode=max
     container_name: notification
     restart: unless-stopped
     environment:
@@ -140,6 +179,11 @@ services:
         condition: service_healthy
     networks:
       - app-net
+    deploy:
+      limits:
+        cpus: '1.50'
+        memory: 512M
+        pids: 100
 
 networks:
   app-net:

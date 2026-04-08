@@ -1,119 +1,161 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --bg: #030303;
-  --surface: #0a0a0a;
-  --surface-hover: #111111;
+  /* Slate-950 Base Palette */
+  --bg: #020617;
+  --surface: #0f172a;
+  --surface-raised: #1e293b;
   
-  --primary: #00f2ff;
-  --primary-glow: rgba(0, 242, 255, 0.4);
+  /* Precision Accents */
+  --primary: #22d3ee; /* Cyan-400 */
+  --primary-glow: rgba(34, 211, 238, 0.3);
   
-  --secondary: #8a2be2;
-  --secondary-glow: rgba(138, 43, 226, 0.4);
+  --secondary: #6366f1; /* Indigo-500 */
+  --secondary-glow: rgba(99, 102, 241, 0.3);
   
-  --accent: #ffd700;
-  --text: #ededed;
-  --text-dim: #a0a0a0;
+  --success: #34d399; /* Emerald-400 */
+  --error: #f43f5e; /* Rose-500 */
   
-  --glass-bg: rgba(255, 255, 255, 0.03);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --glass-bg: rgba(15, 23, 42, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(12px);
-  
-  --success: #00ff88;
-  --error: #ff4d4d;
+  --glass-blur: blur(24px);
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  cursor: crosshair; /* Precision feel */
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
   background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
+  color: var(--text-main);
+  font-family: 'Geist Mono', monospace; /* Default to precision mono */
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: -0.02em;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
 }
 
-/* Nebula Background Effect */
-body::before {
+/* Texture Overlay (Aesthetic Anchor) */
+body::after {
   content: "";
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Background Gradients */
+.bg-stellar-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: 
-    radial-gradient(circle at 20% 30%, var(--primary-glow) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, var(--secondary-glow) 0%, transparent 40%);
+    radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(34, 211, 238, 0.1) 0%, transparent 50%);
   z-index: -1;
   pointer-events: none;
-  opacity: 0.5;
 }
 
-/* Premium UI Utilities */
-.glass {
+/* Luminous Utilities */
+.glass-panel {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
 }
 
-.glass-card {
-  background: rgba(15, 15, 15, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.glow-border {
+  position: relative;
 }
 
-.glass-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 242, 255, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 242, 255, 0.1);
-}
-
-.btn-primary {
+.glow-border::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: #000;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-border:hover::after {
+  opacity: 0.4;
+}
+
+.text-precision {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.btn-primary:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 20px var(--primary-glow);
+.btn-precision {
+  background: var(--primary);
+  color: var(--bg);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  clip-path: polygon(0% 0%, 95% 0%, 100% 25%, 100% 100%, 5% 100%, 0% 75%);
+  transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  border: none;
+  text-transform: uppercase;
 }
 
-.text-gradient {
-  background: linear-gradient(to right, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.btn-precision:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px var(--primary);
 }
 
 /* Animations */
-@keyframes pulse-glow {
-  0% { box-shadow: 0 0 5px var(--primary-glow); }
-  50% { box-shadow: 0 0 20px var(--primary-glow); }
-  100% { box-shadow: 0 0 5px var(--primary-glow); }
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.8; }
+  100% { opacity: 1; }
 }
 
-.pulse-primary {
-  animation: pulse-glow 2s infinite;
+.pulse-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success);
+  animation: flicker 2s infinite ease-in-out;
+}
+
+/* Hide scrollbars but keep functionality */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-raised);
+  border-radius: 10px;
 }

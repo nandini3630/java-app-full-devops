@@ -1,106 +1,77 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { Hammer, User, PlusCircle, LayoutDashboard } from "lucide-react"
-import { useEffect, useState } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { User, PlusCircle, LayoutDashboard, Zap } from "lucide-react"
+import { useAuth } from "@/context/AuthContext"
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  const [username, setUsername] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    
-    // Simple state check for local "auth"
-    const stored = localStorage.getItem("auctionUser")
-    if (stored) {
-      const data = JSON.parse(stored)
-      setUsername(data.username)
-    }
-
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  const { user } = useAuth();
+  const { scrollY } = useScroll();
+  
+  const height = useTransform(scrollY, [0, 50], ["80px", "64px"]);
+  const backgroundColor = useTransform(scrollY, [0, 50], ["rgba(2, 6, 23, 0)", "rgba(15, 23, 42, 0.8)"]);
+  const borderBottom = useTransform(scrollY, [0, 50], ["1px solid rgba(255, 255, 255, 0)", "1px solid rgba(255, 255, 255, 0.1)"]);
 
   return (
     <motion.header 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "py-4 glass" : "py-6 bg-transparent"
-      }`}
+      style={{ height, backgroundColor, borderBottom }}
+      className="fixed top-0 left-0 w-full z-50 flex items-center backdrop-blur-xl transition-colors"
     >
-      <div className="container mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center pulse-primary">
-            <Hammer size={22} color="#000" />
+      <div className="container mx-auto px-6 lg:px-12 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-4 group">
+          <div className="relative">
+            <div className="w-10 h-10 bg-primary flex items-center justify-center rotate-45 group-hover:rotate-90 transition-transform duration-500">
+              <Zap size={20} className="-rotate-45 group-hover:-rotate-90 transition-transform duration-500 fill-bg text-bg" />
+            </div>
+            <div className="absolute -inset-1 bg-primary/20 blur-lg rounded-full group-hover:bg-primary/40 transition-colors" />
           </div>
-          <span className="text-xl font-bold font-outfit tracking-tight">
-            Auction<span className="text-primary italic">X</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tighter leading-none">
+              AUCTION<span className="text-primary italic">X</span>
+            </span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="pulse-live" />
+              <span className="text-[10px] font-bold text-text-muted tracking-widest uppercase">System Live</span>
+            </div>
+          </div>
         </Link>
 
-        <nav className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-            <LayoutDashboard size={18} />
-            Auctions
+        {/* Navigation */}
+        <nav className="hidden md:flex items-center gap-1.5 p-1 bg-slate-900/50 rounded-lg border border-white/5">
+          <Link href="/" className="flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-white/5 transition-colors rounded-md group">
+            <LayoutDashboard size={14} className="text-primary group-hover:scale-110 transition-transform" />
+            Deck
           </Link>
-          <Link href="/create" className="flex items-center gap-2 text-sm font-medium hover:text-primary transition-colors">
-            <PlusCircle size={18} />
-            Create
+          <Link href="/create" className="flex items-center gap-2 px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-white/5 transition-colors rounded-md group">
+            <PlusCircle size={14} className="text-primary group-hover:scale-110 transition-transform" />
+            Deploy
           </Link>
         </nav>
 
+        {/* Profile / Auth */}
         <div className="flex items-center gap-4">
-          {username ? (
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-surface-hover border border-glass-border">
-              <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                <User size={14} color="#000" />
+          {user ? (
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-md bg-slate-900 border border-white/10 group cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded bg-secondary/20 border border-secondary/30 flex items-center justify-center">
+                <User size={16} className="text-secondary" />
               </div>
-              <span className="text-sm font-semibold">{username}</span>
-            </div>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold uppercase tracking-tighter leading-none">{user.username}</span>
+                <span className="text-[9px] text-success font-bold uppercase tracking-widest mt-0.5">Verified Operator</span>
+              </div>
+            </motion.div>
           ) : (
-            <Link href="/register" className="btn-primary">
-               Sign In
+            <Link href="/register" className="btn-precision text-xs tracking-widest">
+               Initialize Session
             </Link>
           )}
         </div>
       </div>
-
-      <style jsx>{`
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-        .flex { display: flex; align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-3 { gap: 12px; }
-        .gap-4 { gap: 16px; }
-        .gap-8 { gap: 32px; }
-        .px-6 { padding-left: 24px; padding-right: 24px; }
-        .py-4 { padding-top: 16px; padding-bottom: 16px; }
-        .py-6 { padding-top: 24px; padding-bottom: 24px; }
-        .text-xl { font-size: 1.25rem; }
-        .font-bold { font-weight: 700; }
-        .text-sm { font-size: 0.875rem; }
-        .font-medium { font-weight: 500; }
-        .transition-all { transition-property: all; }
-        .duration-300 { transition-duration: 300ms; }
-        .fixed { position: fixed; }
-        .top-0 { top: 0; }
-        .z-50 { z-index: 50; }
-        .italic { font-style: italic; }
-        .tracking-tight { letter-spacing: -0.025em; }
-        .rounded-xl { border-radius: 12px; }
-        .bg-gradient-to-tr { background: linear-gradient(to top right, var(--primary), var(--secondary)); }
-        .rounded-full { border-radius: 9999px; }
-        .bg-surface-hover { background-color: var(--surface-hover); }
-        .border-glass-border { border: 1px solid var(--glass-border); }
-        .text-primary { color: var(--primary); }
-      `}</style>
     </motion.header>
   )
 }

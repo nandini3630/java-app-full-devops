@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Sparkles, Gavel, Rocket } from "lucide-react"
+import { Sparkles, Gavel, Rocket, Activity, Users, Shield } from "lucide-react"
 import { auctionApi } from "@/lib/api"
 import AuctionCard from "@/components/AuctionCard"
 
@@ -18,74 +18,114 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="pb-20">
-      {/* Hero Section */}
-      <section className="relative py-32 px-6 overflow-hidden rounded-[3rem] mb-20">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute top-0 left-0 w-full h-full -z-20 bg-cover bg-center transition-transform duration-1000 transform hover:scale-105"
-          style={{ backgroundImage: "url('/hero-bg.png')" }}
-        />
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-bg/60 via-bg/80 to-bg -z-10" />
-        <div className="absolute top-0 left-0 w-full h-full glass -z-10 opacity-20" />
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+    <div className="pt-24 pb-32 px-6 lg:px-12 max-w-[1600px] mx-auto">
+      {/* 1. System Telemetry / Hero Header */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 items-center">
+        <div className="lg:col-span-7">
           <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2 mb-8 bg-primary/5 border border-primary/20 w-fit px-4 py-1.5 rounded-sm"
           >
-            <Sparkles size={14} />
-            Live Bidding Now Open
+            <Activity size={14} className="text-primary animate-pulse" />
+            <span className="text-[10px] font-bold tracking-[0.3em] text-primary uppercase">Network Connected // High Availability</span>
           </motion.div>
           
-          <h1 className="text-5xl md:text-7xl font-bold font-outfit mb-6 leading-tight">
-            Bid on the <span className="text-gradient">Future</span>
-          </h1>
-          
-          <p className="text-text-dim text-lg mb-10 max-w-xl mx-auto">
-            Experience the world's fastest real-time auction platform. 
-            Powered by Kafka, Optimized for DevOps scale.
-          </p>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-6xl lg:text-8xl font-bold leading-none mb-8 tracking-tighter"
+          >
+            PRECISION <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">LIQUIDATION</span>
+          </motion.h1>
 
-          <div className="flex items-center justify-center gap-6">
-            <button className="btn-primary">
-              <Rocket size={18} />
-              Browse Auctions
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-text-muted font-medium max-w-xl mb-12 leading-relaxed"
+          >
+            Deploy capital into high-stakes digital assets. Our ultra-low latency infrastructure ensures your bid hits the ledger first. No slippage. No delays.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap gap-6"
+          >
+            <button className="btn-precision px-12 py-4">
+              Access Terminal
             </button>
-            <button className="px-8 py-3 rounded-xl border border-glass-border font-semibold hover:bg-surface-hover transition-colors">
-              How it works
+            <button className="px-8 py-4 text-xs font-bold uppercase tracking-widest border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-3">
+              Technical Specs
+              <Shield size={16} className="text-secondary" />
             </button>
-          </div>
+          </motion.div>
         </div>
+
+        {/* Telemetry Stats Card */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="lg:col-span-5 grid grid-cols-2 gap-px bg-white/5 border border-white/10 rounded-lg overflow-hidden glass-panel"
+        >
+          <div className="p-8 bg-slate-950/40">
+            <Users size={20} className="text-primary mb-4" />
+            <div className="text-2xl font-bold font-mono">14.2K</div>
+            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Active Nodes</div>
+          </div>
+          <div className="p-8 bg-slate-950/40">
+            <Activity size={20} className="text-secondary mb-4" />
+            <div className="text-2xl font-bold font-mono">1.2ms</div>
+            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Avg Latency</div>
+          </div>
+          <div className="p-8 bg-slate-950/40">
+            <Rocket size={20} className="text-success mb-4" />
+            <div className="text-2xl font-bold font-mono">$4.2M</div>
+            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Volume 24H</div>
+          </div>
+          <div className="p-8 bg-slate-950/40 border-l border-white/5">
+            <Gavel size={20} className="text-primary mb-4" />
+            <div className="text-2xl font-bold font-mono">842</div>
+            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Live Events</div>
+          </div>
+        </motion.div>
       </section>
 
-      {/* Auction Grid */}
+      {/* 2. Active Auctions Grid */}
       <section>
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-surface border border-glass-border">
-              <Gavel size={24} className="text-primary" />
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div className="flex items-center gap-6">
+            <div className="h-16 w-1 bg-primary" />
+            <div>
+              <h2 className="text-4xl font-bold tracking-tight mb-2 uppercase italic">Active Operations</h2>
+              <p className="text-xs font-bold text-text-muted tracking-widest uppercase">Verified Real-Time Auction Ledger</p>
             </div>
-            <h2 className="text-3xl font-bold font-outfit">Active Auctions</h2>
           </div>
-          <div className="text-sm font-medium text-text-dim">
-            Showing <span className="text-text">{auctions.length}</span> live items
+          <div className="px-6 py-3 bg-white/2 rounded-full border border-white/5 text-[10px] font-bold tracking-[0.2em] uppercase text-text-muted">
+            Ledger Count: <span className="text-white ml-2">{auctions.length} Items</span>
           </div>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="glass-card h-80 rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="glass-panel h-[400px] rounded-lg animate-pulse bg-white/5" />
             ))}
           </div>
         ) : auctions.length === 0 ? (
-          <div className="glass text-center py-20 rounded-3xl border-dashed border-2 border-glass-border">
-             <p className="text-text-dim italic">No auctions are live right now. Be the first to create one!</p>
+          <div className="glass-panel text-center py-32 rounded-lg border-white/5">
+             <div className="text-primary mb-6">
+               <Shield size={48} className="mx-auto opacity-20" />
+             </div>
+             <p className="text-xs font-bold tracking-[0.4em] uppercase text-text-muted">No Active Signals Detected In This Sector</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {auctions.map((auction: any) => (
               <AuctionCard 
                 key={auction.id}
@@ -100,41 +140,6 @@ export default function Home() {
           </div>
         )}
       </section>
-      
-      <style jsx>{`
-        .text-gradient {
-          background: linear-gradient(135deg, var(--primary), var(--secondary));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-        .max-w-xl { max-width: 36rem; }
-        .max-w-3xl { max-width: 48rem; }
-        .max-w-7xl { max-width: 80rem; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .grid { display: grid; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .gap-8 { gap: 32px; }
-        .mb-20 { margin-bottom: 80px; }
-        .mb-16 { margin-bottom: 64px; }
-        .mb-10 { margin-bottom: 40px; }
-        .mb-6 { margin-bottom: 24px; }
-        .leading-tight { line-height: 1.25; }
-        .bg-primary\/10 { background-color: rgba(0, 242, 255, 0.1); }
-        .border-primary\/20 { border-color: rgba(0, 242, 255, 0.2); }
-        .text-xs { font-size: 0.75rem; }
-        .text-lg { font-size: 1.125rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .text-5xl { font-size: 3rem; }
-        .justify-center { justify-content: center; }
-        .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        @media (min-width: 768px) {
-          .md\:text-7xl { font-size: 4.5rem; }
-          .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        @media (min-width: 1024px) {
-          .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        }
-      `}</style>
     </div>
   )
 }

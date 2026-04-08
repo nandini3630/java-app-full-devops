@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { PlusCircle, Tag, FileText, DollarSign, Calendar, ArrowRight } from "lucide-react"
+import { PlusCircle, Tag, FileText, DollarSign, Calendar, ArrowRight, Zap, Shield, Activity, Database } from "lucide-react"
 import { auctionApi } from "@/lib/api"
 
 export default function CreateAuction() {
@@ -26,131 +26,179 @@ export default function CreateAuction() {
       })
       router.push("/")
     } catch (err) {
-      alert("Failed to create auction: " + err)
+      alert("FIELD_VALIDATION_ERROR: " + err)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6">
-      <div className="flex items-center gap-4 mb-12">
-        <div className="p-4 rounded-2xl bg-primary/20 border border-primary/30">
-          <PlusCircle size={32} className="text-primary" />
+    <div className="pt-24 pb-32 px-6 lg:px-12 max-w-[1400px] mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-16 gap-8">
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 bg-primary/10 border border-primary/30 flex items-center justify-center rounded-sm">
+            <PlusCircle size={32} className="text-primary" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Database size={14} className="text-secondary" />
+              <span className="text-[10px] font-bold text-text-muted tracking-[0.4em] uppercase">Deployment Console // Node_01</span>
+            </div>
+            <h1 className="text-4xl font-bold tracking-tighter uppercase leading-none">DEPLOY NEW <span className="text-primary">ASSET</span></h1>
+          </div>
         </div>
-        <div>
-          <h1 className="text-4xl font-bold font-outfit">List New Item</h1>
-          <p className="text-text-dim mt-1">Fill in the details to start a live auction room.</p>
+        <div className="px-6 py-3 bg-white/2 border border-white/5 text-[9px] font-bold tracking-[0.2em] uppercase text-text-muted">
+          Broadcast Status: <span className="text-success ml-2">READY_FOR_UPSTREAM</span>
         </div>
       </div>
 
       <motion.form 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handleSubmit}
-        className="glass rounded-3xl p-10 grid grid-cols-1 md:grid-cols-2 gap-8 border border-glass-border"
+        className="grid grid-cols-1 xl:grid-cols-12 gap-12"
       >
-        {/* Left Column */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Item Title</label>
-            <div className="relative">
-              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
-              <input 
-                type="text" 
-                required 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all"
-                placeholder="e.g. Vintage Rolex Submariner"
-              />
-            </div>
-          </div>
+        {/* Main Configuration Panes */}
+        <div className="xl:col-span-8 space-y-8">
+           <div className="glass-panel p-10 rounded-lg">
+              <h3 className="text-[11px] font-bold tracking-[0.3em] uppercase mb-10 text-primary border-b border-primary/20 pb-4 w-fit">Primary Configuration</h3>
+              
+              <div className="space-y-10">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Asset Nomenclature (Title)</label>
+                    <Tag size={12} className="text-primary/40" />
+                  </div>
+                  <input 
+                    type="text" 
+                    required 
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-xl font-bold font-mono outline-none focus:border-primary transition-all placeholder:text-white/10"
+                    placeholder="E.G. QUANTUM_PROCESSOR_V2"
+                  />
+                </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Description</label>
-            <div className="relative h-full">
-              <FileText className="absolute left-4 top-4 text-text-dim" size={18} />
-              <textarea 
-                required 
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all resize-none"
-                placeholder="Tell us about the item's history, condition, and rarity..."
-              />
-            </div>
-          </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Descriptive Intelligence</label>
+                    <FileText size={12} className="text-secondary/40" />
+                  </div>
+                  <textarea 
+                    required 
+                    rows={6}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-sm font-medium font-mono outline-none focus:border-primary transition-all resize-none placeholder:text-white/10 leading-relaxed"
+                    placeholder="ENTRY_DATA: HISTORICAL_RECORD, PHYSICAL_STATE, PROVENANCE..."
+                  />
+                </div>
+              </div>
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="glass-panel p-10 rounded-lg">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Start Threshold ($)</label>
+                    <DollarSign size={12} className="text-success/40" />
+                  </div>
+                  <input 
+                    type="number" 
+                    required 
+                    step="0.01"
+                    value={startingPrice}
+                    onChange={(e) => setStartingPrice(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-2xl font-bold font-mono outline-none focus:border-primary transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div className="glass-panel p-10 rounded-lg">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Termination Timestamp</label>
+                    <Calendar size={12} className="text-primary/40" />
+                  </div>
+                  <input 
+                    type="datetime-local" 
+                    required 
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-sm font-bold font-mono outline-none focus:border-primary transition-all uppercase"
+                  />
+                </div>
+              </div>
+           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Starting Price ($)</label>
-            <div className="relative">
-              <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
-              <input 
-                type="number" 
-                required 
-                step="0.01"
-                value={startingPrice}
-                onChange={(e) => setStartingPrice(e.target.value)}
-                className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
+        {/* Deployment Metadata / Checklist */}
+        <div className="xl:col-span-4 space-y-8">
+           <div className="glass-panel p-8 rounded-lg bg-slate-900/50">
+              <h3 className="text-xs font-bold uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+                <Shield size={16} className="text-primary" />
+                Pre-Flight Check
+              </h3>
+              
+              <ul className="space-y-6">
+                <li className="flex items-center gap-4">
+                  <div className={`w-4 h-4 rounded-full border-2 ${title ? "bg-success border-success" : "border-white/10"}`} />
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Nomenclature Loaded</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <div className={`w-4 h-4 rounded-full border-2 ${description.length > 20 ? "bg-success border-success" : "border-white/10"}`} />
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Description_Buffer_Min</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <div className={`w-4 h-4 rounded-full border-2 ${startingPrice ? "bg-success border-success" : "border-white/10"}`} />
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Capital Val Verified</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <div className={`w-4 h-4 rounded-full border-2 ${endTime ? "bg-success border-success" : "border-white/10"}`} />
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Expiry_Sync_Active</span>
+                </li>
+              </ul>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-text-dim uppercase tracking-widest px-1">Auction End Time</label>
-            <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-text-dim" size={18} />
-              <input 
-                type="datetime-local" 
-                required 
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full bg-surface border border-glass-border rounded-xl py-3 pl-12 pr-4 focus:border-primary outline-none transition-all"
-              />
-            </div>
-          </div>
+              <div className="mt-12 p-6 bg-secondary/5 border border-secondary/20 rounded-sm">
+                 <div className="flex items-center gap-2 mb-3">
+                   <Activity size={14} className="text-secondary" />
+                   <span className="text-[9px] font-bold text-secondary uppercase tracking-[0.2em]">DevOps Relay</span>
+                 </div>
+                 <p className="text-[10px] font-medium leading-relaxed italic text-text-muted">
+                   Pushing this resource will trigger the Kafka event bus across the cluster. Notification workers will broadcast the signature to all connected agents.
+                 </p>
+              </div>
 
-          <div className="p-6 rounded-2xl bg-secondary/10 border border-secondary/20 mt-10">
-            <p className="text-xs text-text-dim italic leading-relaxed">
-              <strong>DevOps Note:</strong> Once created, this item will be broadcasted across the cluster and Kafka event listeners will start tracking it for the payment service.
-            </p>
-          </div>
+              <div className="mt-8">
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full btn-precision h-20 text-[11px] tracking-[0.4em] flex items-center justify-center gap-4 group"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">INITIALIZING...</span>
+                  ) : (
+                    <>
+                      <Zap size={18} />
+                      DEPLOY TO CLUSTER
+                      <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+                    </>
+                  )}
+                </button>
+              </div>
+           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full btn-primary justify-center h-14 text-md mt-6"
-          >
-            {loading ? "Initializing Auction..." : "Launch Auction"}
-            {!loading && <ArrowRight size={20} />}
-          </button>
+           <div className="glass-panel p-8 rounded-lg">
+              <div className="text-[9px] font-bold text-text-muted uppercase tracking-[0.3em] mb-4">Relay Status</div>
+              <div className="flex items-center gap-2">
+                <div className="pulse-live" />
+                <span className="text-[9px] font-bold text-success uppercase font-mono">Upstream Connection Nominal</span>
+              </div>
+           </div>
         </div>
       </motion.form>
-      
-      <style jsx>{`
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .max-w-4xl { max-width: 56rem; }
-        .space-y-6 > * + * { margin-top: 24px; }
-        .space-y-2 > * + * { margin-top: 8px; }
-        .grid { display: grid; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .gap-12 { gap: 48px; }
-        .gap-8 { gap: 32px; }
-        .px-4 { padding-left: 16px; padding-right: 16px; }
-        .pl-12 { padding-left: 48px; }
-        .pr-4 { padding-right: 16px; }
-        .py-3 { padding-top: 12px; padding-bottom: 12px; }
-        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
-        @media (min-width: 768px) {
-          .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-      `}</style>
     </div>
   )
 }
