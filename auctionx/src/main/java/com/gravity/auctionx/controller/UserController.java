@@ -23,4 +23,12 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(userRepository.save(user));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserRegistrationRequest request) {
+        return userRepository.findByUsername(request.getUsername())
+                .filter(u -> u.getEmail().equalsIgnoreCase(request.getEmail()))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(401).body((User) null));
+    }
 }

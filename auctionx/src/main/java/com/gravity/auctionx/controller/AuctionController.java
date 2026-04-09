@@ -75,4 +75,9 @@ public class AuctionController {
             @RequestBody com.gravity.auctionx.dto.AuctionRequest req) {
         return ResponseEntity.ok(auctionService.createAuction(req));
     }
+
+    @GetMapping("/{id}/bids")
+    public ResponseEntity<java.util.List<com.gravity.auctionx.domain.Bid>> getBids(@PathVariable Long id) {
+        return ResponseEntity.ok(auctionService.getBidHistory(id));
+    }
 }
