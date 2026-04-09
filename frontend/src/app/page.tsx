@@ -1,147 +1,193 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import { Sparkles, Gavel, Rocket, Activity, Users, Shield } from "lucide-react"
+import { useEffect, useState, useCallback } from "react"
+import Link from "next/link"
 import { auctionApi } from "@/lib/api"
 import AuctionCard from "@/components/AuctionCard"
+import { Auction } from "@/types"
+
+function SkeletonCard() {
+  return (
+    <div className="glass" style={{ borderRadius: '14px', overflow: 'hidden', height: '340px' }}>
+      <div className="skeleton" style={{ height: '3px' }} />
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="skeleton" style={{ height: '12px', width: '60px' }} />
+        <div className="skeleton" style={{ height: '20px', width: '80%' }} />
+        <div className="skeleton" style={{ height: '14px', width: '100%' }} />
+        <div className="skeleton" style={{ height: '14px', width: '70%' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: 'auto' }}>
+          <div className="skeleton" style={{ height: '68px', borderRadius: '8px' }} />
+          <div className="skeleton" style={{ height: '68px', borderRadius: '8px' }} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HeroStat({ value, label, color = 'var(--amber)' }: { value: string; label: string; color?: string }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <p className="mono" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 800, color, lineHeight: 1 }}>{value}</p>
+      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.375rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
+    </div>
+  )
+}
 
 export default function Home() {
-  const [auctions, setAuctions] = useState<any[]>([])
+  const [auctions, setAuctions] = useState<Auction[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'ENDED'>('ALL')
+  const [error, setError] = useState('')
 
-  useEffect(() => {
-    auctionApi.getAuctions()
-      .then(data => setAuctions(data))
-      .catch(err => console.error("Failed to load auctions", err))
-      .finally(() => setLoading(false))
+  const fetchAuctions = useCallback(async () => {
+    setError('')
+    try {
+      const data = await auctionApi.getAuctions()
+      setAuctions(data)
+    } catch {
+      setError('Could not connect to the backend. Make sure your EC2 instance is running.')
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
+  useEffect(() => {
+    fetchAuctions()
+    const interval = setInterval(fetchAuctions, 15000)
+    return () => clearInterval(interval)
+  }, [fetchAuctions])
+
+  const filtered = auctions.filter(a => filter === 'ALL' || a.status === filter)
+  const activeCount = auctions.filter(a => a.status === 'ACTIVE').length
+
   return (
-    <div className="pt-24 pb-32 px-6 lg:px-12 max-w-[1600px] mx-auto">
-      {/* 1. System Telemetry / Hero Header */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 items-center">
-        <div className="lg:col-span-7">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 mb-8 bg-primary/5 border border-primary/20 w-fit px-4 py-1.5 rounded-sm"
-          >
-            <Activity size={14} className="text-primary animate-pulse" />
-            <span className="text-[10px] font-bold tracking-[0.3em] text-primary uppercase">Network Connected // High Availability</span>
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-6xl lg:text-8xl font-bold leading-none mb-8 tracking-tighter"
-          >
-            PRECISION <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">LIQUIDATION</span>
-          </motion.h1>
-
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-lg text-text-muted font-medium max-w-xl mb-12 leading-relaxed"
-          >
-            Deploy capital into high-stakes digital assets. Our ultra-low latency infrastructure ensures your bid hits the ledger first. No slippage. No delays.
-          </motion.p>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-wrap gap-6"
-          >
-            <button className="btn-precision px-12 py-4">
-              Access Terminal
-            </button>
-            <button className="px-8 py-4 text-xs font-bold uppercase tracking-widest border border-white/10 hover:bg-white/5 transition-colors flex items-center gap-3">
-              Technical Specs
-              <Shield size={16} className="text-secondary" />
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Telemetry Stats Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-          className="lg:col-span-5 grid grid-cols-2 gap-px bg-white/5 border border-white/10 rounded-lg overflow-hidden glass-panel"
-        >
-          <div className="p-8 bg-slate-950/40">
-            <Users size={20} className="text-primary mb-4" />
-            <div className="text-2xl font-bold font-mono">14.2K</div>
-            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Active Nodes</div>
+    <div style={{ paddingTop: '68px', minHeight: '100vh' }}>
+      {/* ── Hero ── */}
+      <div style={{ position: 'relative', padding: 'clamp(3rem, 8vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem)' }}>
+        <div className="container-app">
+          <div style={{ maxWidth: '720px', marginBottom: 'clamp(2rem, 5vw, 3.5rem)' }}>
+            <div className="badge badge-active" style={{ marginBottom: '1.25rem' }}>
+              <div className="live-dot" style={{ transform: 'scale(0.65)' }} />
+              {activeCount} Live Auction{activeCount !== 1 ? 's' : ''} · Updated live
+            </div>
+            <h1 style={{
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: 800,
+              fontSize: 'clamp(2.25rem, 6vw, 4rem)',
+              lineHeight: 1.08,
+              letterSpacing: '-0.03em',
+              color: 'var(--text-primary)',
+              marginBottom: '1.25rem',
+            }}>
+              Bid on premium<br />
+              assets in <span style={{ color: 'var(--amber)' }}>real time</span>
+            </h1>
+            <p style={{ fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', color: 'var(--text-secondary)', lineHeight: 1.7, maxWidth: '520px' }}>
+              Powered by Kafka-backed bidding engine with PostgreSQL optimistic locking. Every bid is atomic, every transaction is final.
+            </p>
           </div>
-          <div className="p-8 bg-slate-950/40">
-            <Activity size={20} className="text-secondary mb-4" />
-            <div className="text-2xl font-bold font-mono">1.2ms</div>
-            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Avg Latency</div>
-          </div>
-          <div className="p-8 bg-slate-950/40">
-            <Rocket size={20} className="text-success mb-4" />
-            <div className="text-2xl font-bold font-mono">$4.2M</div>
-            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Volume 24H</div>
-          </div>
-          <div className="p-8 bg-slate-950/40 border-l border-white/5">
-            <Gavel size={20} className="text-primary mb-4" />
-            <div className="text-2xl font-bold font-mono">842</div>
-            <div className="text-[9px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">Live Events</div>
-          </div>
-        </motion.div>
-      </section>
 
-      {/* 2. Active Auctions Grid */}
-      <section>
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div className="flex items-center gap-6">
-            <div className="h-16 w-1 bg-primary" />
-            <div>
-              <h2 className="text-4xl font-bold tracking-tight mb-2 uppercase italic">Active Operations</h2>
-              <p className="text-xs font-bold text-text-muted tracking-widest uppercase">Verified Real-Time Auction Ledger</p>
+          {/* Stat Row */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+            gap: '0.75rem',
+            marginBottom: '2.5rem',
+            maxWidth: '600px',
+          }}>
+            <div className="glass" style={{ borderRadius: '10px', padding: '1.25rem', textAlign: 'center' }}>
+              <HeroStat value={`${activeCount}`} label="Active" />
+            </div>
+            <div className="glass" style={{ borderRadius: '10px', padding: '1.25rem', textAlign: 'center' }}>
+              <HeroStat value={`${auctions.length}`} label="Total" color="var(--blue-light)" />
+            </div>
+            <div className="glass" style={{ borderRadius: '10px', padding: '1.25rem', textAlign: 'center' }}>
+              <HeroStat value="1ms" label="Latency" color="var(--emerald)" />
+            </div>
+            <div className="glass" style={{ borderRadius: '10px', padding: '1.25rem', textAlign: 'center' }}>
+              <HeroStat value="∞" label="Scalable" color="var(--violet)" />
             </div>
           </div>
-          <div className="px-6 py-3 bg-white/2 rounded-full border border-white/5 text-[10px] font-bold tracking-[0.2em] uppercase text-text-muted">
-            Ledger Count: <span className="text-white ml-2">{auctions.length} Items</span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', flexWrap: 'wrap' }}>
+            <Link href="/create" className="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Create Listing
+            </Link>
+            <Link href="/register" className="btn-ghost">Set up your account</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Listings ── */}
+      <div className="container-app" style={{ paddingBottom: '5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 'clamp(1.25rem, 3vw, 1.625rem)', color: 'var(--text-primary)' }}>
+            Browse Listings
+          </h2>
+
+          {/* Filter tabs */}
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-surface)', borderRadius: '10px', padding: '0.3rem', border: '1px solid var(--border)' }}>
+            {(['ALL', 'ACTIVE', 'ENDED'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  padding: '0.4rem 1rem', borderRadius: '7px', border: 'none', cursor: 'pointer',
+                  fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '0.8rem', transition: 'all 0.15s',
+                  background: filter === f ? 'var(--bg-elevated)' : 'transparent',
+                  color: filter === f ? 'var(--text-primary)' : 'var(--text-muted)',
+                  boxShadow: filter === f ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
+                }}
+              >
+                {f === 'ALL' ? 'All' : f === 'ACTIVE' ? '🟢 Active' : '⚫ Ended'}
+              </button>
+            ))}
           </div>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="glass-panel h-[400px] rounded-lg animate-pulse bg-white/5" />
-            ))}
+        {error && (
+          <div className="alert alert-warning" style={{ marginBottom: '2rem' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>
+              <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Cannot reach backend</p>
+              <p style={{ fontSize: '0.82rem', opacity: 0.8 }}>{error}</p>
+            </div>
           </div>
-        ) : auctions.length === 0 ? (
-          <div className="glass-panel text-center py-32 rounded-lg border-white/5">
-             <div className="text-primary mb-6">
-               <Shield size={48} className="mx-auto opacity-20" />
-             </div>
-             <p className="text-xs font-bold tracking-[0.4em] uppercase text-text-muted">No Active Signals Detected In This Sector</p>
+        )}
+
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+            {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="glass" style={{ borderRadius: '16px', padding: 'clamp(3rem, 8vw, 5rem)', textAlign: 'center' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto' }}>
+                <path d="M14 12l-8.5 8.5a2.12 2.12 0 01-3-3L11 9"/><path d="M5 7l4 4"/><path d="m21 3-9 9"/><path d="M21 3H15"/><path d="M21 3V9"/>
+              </svg>
+            </div>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+              {filter === 'ENDED' ? 'No ended auctions' : 'No active listings yet'}
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+              {filter === 'ALL' ? 'Be the first one to create an auction listing.' : `No ${filter.toLowerCase()} listings found.`}
+            </p>
+            {filter === 'ALL' && <Link href="/create" className="btn-primary">Create First Listing</Link>}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {auctions.map((auction: any) => (
-              <AuctionCard 
-                key={auction.id}
-                id={auction.id}
-                title={auction.title}
-                description={auction.description}
-                currentHighestBid={auction.currentHighestBid}
-                startingPrice={auction.startingPrice || 0}
-                startTime={auction.startTime || new Date().toISOString()}
-                endTime={auction.endTime}
-                status={auction.status}
-              />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}>
+            {filtered.map(auction => (
+              <AuctionCard key={auction.id} {...auction} />
             ))}
           </div>
         )}
-      </section>
+      </div>
     </div>
   )
 }

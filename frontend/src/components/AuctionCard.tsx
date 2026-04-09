@@ -2,109 +2,153 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { Timer, ArrowUpRight, TrendingUp, ShieldCheck } from "lucide-react"
 import { Auction } from "@/types"
 
-export default function AuctionCard({ id, title, description, currentHighestBid, endTime, status }: Auction) {
-  const [timeLeft, setTimeLeft] = useState("")
-  const [progress, setProgress] = useState(100)
+interface CountdownProps {
+  endTime: string
+}
+
+/** Backend returns timestamps WITHOUT 'Z' (e.g. "2026-04-09T07:10:00"). 
+ *  Browsers on IST/non-UTC zones treat these as LOCAL time, making them
+ *  5+ hours off. This helper forces UTC interpretation. */
+function toUTCMs(dateStr: string): number {
+  if (!dateStr) return 0
+  // Already has timezone info? Parse as-is. Otherwise append Z for UTC.
+  const s = /Z|[+-]\d{2}:?\d{2}$/.test(dateStr) ? dateStr : dateStr + 'Z'
+  return new Date(s).getTime()
+}
+
+function Countdown({ endTime }: CountdownProps) {
+  const [display, setDisplay] = useState('')
+  const [urgency, setUrgency] = useState<'ok' | 'warn' | 'urgent'>('ok')
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date().getTime()
-      const end = new Date(endTime).getTime()
-      const start = end - (24 * 60 * 60 * 1000) // Assume 24h duration for visual progress if not provided
-      const total = end - start
-      const remaining = end - now
-      
-      if (remaining <= 0) {
-        setTimeLeft("EXPIRED")
-        setProgress(0)
-        clearInterval(timer)
-      } else {
-        const h = Math.floor(remaining / (1000 * 60 * 60))
-        const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
-        const s = Math.floor((remaining % (1000 * 60)) / 1000)
-        setTimeLeft(`${h}H ${m}M ${s}S`)
-        setProgress((remaining / total) * 100)
-      }
-    }, 1000)
+    const update = () => {
+      const now = Date.now()
+      const end = toUTCMs(endTime)
+      const diff = end - now
 
-    return () => clearInterval(timer)
+      if (diff <= 0) { setDisplay('Ended'); return }
+
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      const s = Math.floor((diff % 60000) / 1000)
+
+      if (diff < 3600000) setUrgency(diff < 600000 ? 'urgent' : 'warn')
+      else setUrgency('ok')
+
+      if (h > 0) setDisplay(`${h}h ${m}m`)
+      else if (m > 0) setDisplay(`${m}m ${s}s`)
+      else setDisplay(`${s}s`)
+    }
+    update()
+    const id = setInterval(update, 1000)
+    return () => clearInterval(id)
   }, [endTime])
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
-      viewport={{ once: true }}
-      className="glass-panel rounded-lg p-0 relative overflow-hidden group border-white/5 hover:border-primary/30 transition-colors duration-500"
-    >
-      {/* Top Status Bar */}
-      <div className="h-1 w-full bg-slate-800">
-        <motion.div 
-          className="h-full bg-primary"
-          initial={{ width: "100%" }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 1 }}
-        />
-      </div>
+  const colorMap = { ok: 'var(--emerald)', warn: 'var(--amber)', urgent: 'var(--red)' }
 
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck size={12} className="text-primary" />
-              <span className="text-[10px] font-bold text-text-muted tracking-[0.2em] uppercase">Secured Lot #{id}</span>
-            </div>
-            <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">{title}</h3>
+  return (
+    <span className="mono" style={{ color: colorMap[urgency], fontWeight: 600, fontSize: '0.85rem' }}>
+      {display}
+    </span>
+  )
+}
+
+function ProgressBar({ startTime, endTime }: { startTime: string; endTime: string }) {
+  const [pct, setPct] = useState(100)
+  useEffect(() => {
+    const update = () => {
+      const now = Date.now()
+      const start = toUTCMs(startTime || endTime) - 24 * 3600000
+      const end = toUTCMs(endTime)
+      const total = end - start
+      const remaining = end - now
+      setPct(Math.max(0, Math.min(100, (remaining / total) * 100)))
+    }
+    update()
+    const id = setInterval(update, 5000)
+    return () => clearInterval(id)
+  }, [startTime, endTime])
+
+  return (
+    <div className="progress-track">
+      <div className="progress-fill" style={{ width: `${pct}%` }} />
+    </div>
+  )
+}
+
+export default function AuctionCard({ id, title, description, currentHighestBid, startingPrice, startTime, endTime, status }: Auction) {
+  const isActive = status === 'ACTIVE'
+
+  return (
+    <div className="glass card-hover" style={{
+      borderRadius: '14px',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    }}>
+      {/* Top color stripe */}
+      <ProgressBar startTime={startTime} endTime={endTime} />
+
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '1rem' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <div>
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '0.375rem', fontWeight: 500 }}>
+              LOT #{String(id).padStart(3, '0')}
+            </p>
+            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.3, color: 'var(--text-primary)' }}>
+              {title}
+            </h3>
           </div>
-          <div className="px-2 py-1 bg-slate-900 border border-white/10 rounded text-[9px] font-bold text-primary tracking-widest uppercase">
+          <span className={`badge ${isActive ? 'badge-active' : 'badge-ended'}`} style={{ flexShrink: 0 }}>
+            {isActive && <div className="live-dot" style={{ transform: 'scale(0.6)' }} />}
             {status}
-          </div>
+          </span>
         </div>
 
-        <p className="text-text-muted text-xs font-medium leading-relaxed line-clamp-2 mb-8 h-8 italic">
-          &quot;{description}&quot;
+        {/* Description */}
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', flex: 1 }}>
+          {description}
         </p>
 
-        <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5 bg-white/2">
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-bold text-text-muted tracking-widest flex items-center gap-1.5 mb-2">
-              <TrendingUp size={10} className="text-primary" />
-              Current Value
-            </span>
-            <span className="text-2xl font-bold font-mono tracking-tighter text-white">
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ background: 'var(--bg-elevated)', borderRadius: '8px', padding: '0.875rem' }}>
+            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.375rem' }}>Current Bid</p>
+            <p className="mono" style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--amber)' }}>
               ${currentHighestBid.toLocaleString()}
-            </span>
+            </p>
           </div>
-          <div className="flex flex-col border-l border-white/5 pl-4">
-            <span className="text-[9px] uppercase font-bold text-text-muted tracking-widest flex items-center gap-1.5 mb-2">
-              <Timer size={10} className="text-secondary" />
-              Time Remaining
-            </span>
-            <span className="text-base font-bold font-mono text-primary">
-              {timeLeft}
-            </span>
+          <div style={{ background: 'var(--bg-elevated)', borderRadius: '8px', padding: '0.875rem' }}>
+            <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.375rem' }}>
+              {isActive ? 'Ends In' : 'Ended'}
+            </p>
+            <Countdown endTime={endTime} />
           </div>
         </div>
 
-        <div className="mt-8">
-          <Link 
-            href={`/auction/${id}`} 
-            className="w-full btn-precision justify-center text-[11px] tracking-[0.2em] flex items-center gap-3"
-          >
-            Enter Viewing Room
-            <ArrowUpRight size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+        {/* Starting price */}
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          Starting price: <span className="mono" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>${startingPrice.toLocaleString()}</span>
+        </p>
+
+        {/* CTA */}
+        {isActive ? (
+          <Link href={`/auction/${id}`} className="btn-primary" style={{ width: '100%' }}>
+            Place a Bid
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
           </Link>
-        </div>
+        ) : (
+          <Link href={`/auction/${id}`} className="btn-ghost" style={{ width: '100%' }}>
+            View Details
+          </Link>
+        )}
       </div>
-
-      {/* Decorative Corners */}
-      <div className="absolute top-1 left-1 w-2 h-2 border-t border-l border-white/20" />
-      <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r border-white/20" />
-    </motion.div>
+    </div>
   )
 }

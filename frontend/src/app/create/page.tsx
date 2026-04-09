@@ -2,203 +2,244 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { PlusCircle, Tag, FileText, DollarSign, Calendar, ArrowRight, Zap, Shield, Activity, Database } from "lucide-react"
+import Link from "next/link"
 import { auctionApi } from "@/lib/api"
+import { useAuth } from "@/context/AuthContext"
+
+const PRESETS = [
+  { label: "1 hour", hours: 1 },
+  { label: "6 hours", hours: 6 },
+  { label: "1 day", hours: 24 },
+  { label: "3 days", hours: 72 },
+  { label: "1 week", hours: 168 },
+]
+
+function getEndTime(hours: number) {
+  const d = new Date(Date.now() + hours * 3600000)
+  // Format for datetime-local: YYYY-MM-DDTHH:mm
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function formatToISO(local: string) {
+  return new Date(local).toISOString().replace('Z', '')
+}
 
 export default function CreateAuction() {
+  const { user } = useAuth()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [startingPrice, setStartingPrice] = useState("")
-  const [endTime, setEndTime] = useState("")
+  const [endTime, setEndTime] = useState(getEndTime(24))
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
   const router = useRouter()
+
+  const allFilled = title.length >= 3 && description.length >= 10 && Number(startingPrice) > 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!allFilled) return
+    setError("")
     setLoading(true)
     try {
-      await auctionApi.createAuction({
+      const created = await auctionApi.createAuction({
         title,
         description,
         startingPrice: parseFloat(startingPrice),
-        endTime,
+        endTime: formatToISO(endTime),
       })
-      router.push("/")
-    } catch (err) {
-      alert("FIELD_VALIDATION_ERROR: " + err)
+      router.push(`/auction/${created.id}`)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create auction.")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="pt-24 pb-32 px-6 lg:px-12 max-w-[1400px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-16 gap-8">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-primary/10 border border-primary/30 flex items-center justify-center rounded-sm">
-            <PlusCircle size={32} className="text-primary" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Database size={14} className="text-secondary" />
-              <span className="text-[10px] font-bold text-text-muted tracking-[0.4em] uppercase">Deployment Console // Node_01</span>
+    <div style={{ paddingTop: '68px', minHeight: '100vh', paddingBottom: '5rem' }}>
+      <div className="container-app" style={{ paddingTop: 'clamp(2rem, 5vw, 3.5rem)' }}>
+
+        {/* Page Header */}
+        <div style={{ marginBottom: '2.5rem' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500, marginBottom: '1.5rem' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7"/>
+            </svg>
+            Back to Auctions
+          </Link>
+          <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: '0.625rem' }}>
+            Create New Listing
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Once published, your item goes live on the Kafka auction bus instantly.</p>
+        </div>
+
+        {!user && (
+          <div className="alert alert-warning" style={{ marginBottom: '2rem' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div>
+              <p style={{ fontWeight: 600 }}>You are not logged in</p>
+              <p style={{ fontSize: '0.85rem', opacity: 0.85 }}>The auction will be created in the system. <Link href="/register" style={{ color: 'var(--amber)', fontWeight: 600 }}>Register an account</Link> to track your listings.</p>
             </div>
-            <h1 className="text-4xl font-bold tracking-tighter uppercase leading-none">DEPLOY NEW <span className="text-primary">ASSET</span></h1>
           </div>
-        </div>
-        <div className="px-6 py-3 bg-white/2 border border-white/5 text-[9px] font-bold tracking-[0.2em] uppercase text-text-muted">
-          Broadcast Status: <span className="text-success ml-2">READY_FOR_UPSTREAM</span>
-        </div>
-      </div>
+        )}
 
-      <motion.form 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 xl:grid-cols-12 gap-12"
-      >
-        {/* Main Configuration Panes */}
-        <div className="xl:col-span-8 space-y-8">
-           <div className="glass-panel p-10 rounded-lg">
-              <h3 className="text-[11px] font-bold tracking-[0.3em] uppercase mb-10 text-primary border-b border-primary/20 pb-4 w-fit">Primary Configuration</h3>
-              
-              <div className="space-y-10">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Asset Nomenclature (Title)</label>
-                    <Tag size={12} className="text-primary/40" />
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.25rem' }}>
+
+            {/* Main Form */}
+            <div style={{ gridColumn: 'span 12' }} className="form-main">
+              <div className="glass" style={{ borderRadius: '14px', padding: 'clamp(1.5rem, 4vw, 2.5rem)', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+
+                {error && (
+                  <div className="alert alert-error">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p>{error}</p>
                   </div>
-                  <input 
-                    type="text" 
-                    required 
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-xl font-bold font-mono outline-none focus:border-primary transition-all placeholder:text-white/10"
-                    placeholder="E.G. QUANTUM_PROCESSOR_V2"
+                )}
+
+                {/* Title */}
+                <div>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    Item Title <span style={{ color: 'var(--red)' }}>*</span>
+                  </label>
+                  <input
+                    type="text" className="input" value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    placeholder="e.g. Vintage Rolex Submariner 1970"
+                    required minLength={3} maxLength={100}
                   />
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>{title.length}/100 characters</p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Descriptive Intelligence</label>
-                    <FileText size={12} className="text-secondary/40" />
-                  </div>
-                  <textarea 
-                    required 
-                    rows={6}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-sm font-medium font-mono outline-none focus:border-primary transition-all resize-none placeholder:text-white/10 leading-relaxed"
-                    placeholder="ENTRY_DATA: HISTORICAL_RECORD, PHYSICAL_STATE, PROVENANCE..."
+                {/* Description */}
+                <div>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    Description <span style={{ color: 'var(--red)' }}>*</span>
+                  </label>
+                  <textarea
+                    className="input" value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Describe the item's condition, provenance, and any notable features..."
+                    required minLength={10} rows={5}
+                    style={{ resize: 'vertical', lineHeight: 1.6 }}
                   />
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>{description.length} characters (min. 10)</p>
                 </div>
-              </div>
-           </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="glass-panel p-10 rounded-lg">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Start Threshold ($)</label>
-                    <DollarSign size={12} className="text-success/40" />
+                {/* Price + Time Row */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                      Starting Price (USD) <span style={{ color: 'var(--red)' }}>*</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>$</span>
+                      <input
+                        type="number" className="input mono" value={startingPrice}
+                        onChange={e => setStartingPrice(e.target.value)}
+                        placeholder="0.00" required min="0.01" step="0.01"
+                        style={{ paddingLeft: '2rem' }}
+                      />
+                    </div>
                   </div>
-                  <input 
-                    type="number" 
-                    required 
-                    step="0.01"
-                    value={startingPrice}
-                    onChange={(e) => setStartingPrice(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-2xl font-bold font-mono outline-none focus:border-primary transition-all"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
 
-              <div className="glass-panel p-10 rounded-lg">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Termination Timestamp</label>
-                    <Calendar size={12} className="text-primary/40" />
+                  <div>
+                    <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                      Auction Ends At <span style={{ color: 'var(--red)' }}>*</span>
+                    </label>
+                    <input
+                      type="datetime-local" className="input mono" value={endTime}
+                      onChange={e => setEndTime(e.target.value)}
+                      min={new Date(Date.now() + 60000).toISOString().slice(0,16)}
+                      required
+                      style={{ colorScheme: 'dark' }}
+                    />
                   </div>
-                  <input 
-                    type="datetime-local" 
-                    required 
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full bg-slate-950 border border-white/10 rounded-sm py-4 px-6 text-sm font-bold font-mono outline-none focus:border-primary transition-all uppercase"
-                  />
                 </div>
-              </div>
-           </div>
-        </div>
 
-        {/* Deployment Metadata / Checklist */}
-        <div className="xl:col-span-4 space-y-8">
-           <div className="glass-panel p-8 rounded-lg bg-slate-900/50">
-              <h3 className="text-xs font-bold uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                <Shield size={16} className="text-primary" />
-                Pre-Flight Check
-              </h3>
-              
-              <ul className="space-y-6">
-                <li className="flex items-center gap-4">
-                  <div className={`w-4 h-4 rounded-full border-2 ${title ? "bg-success border-success" : "border-white/10"}`} />
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Nomenclature Loaded</span>
-                </li>
-                <li className="flex items-center gap-4">
-                  <div className={`w-4 h-4 rounded-full border-2 ${description.length > 20 ? "bg-success border-success" : "border-white/10"}`} />
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Description_Buffer_Min</span>
-                </li>
-                <li className="flex items-center gap-4">
-                  <div className={`w-4 h-4 rounded-full border-2 ${startingPrice ? "bg-success border-success" : "border-white/10"}`} />
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Capital Val Verified</span>
-                </li>
-                <li className="flex items-center gap-4">
-                  <div className={`w-4 h-4 rounded-full border-2 ${endTime ? "bg-success border-success" : "border-white/10"}`} />
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Expiry_Sync_Active</span>
-                </li>
-              </ul>
+                {/* Quick Duration Presets */}
+                <div>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                    Quick Duration Presets
+                  </label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                    {PRESETS.map(p => (
+                      <button
+                        key={p.hours} type="button"
+                        onClick={() => setEndTime(getEndTime(p.hours))}
+                        style={{
+                          padding: '0.4rem 0.9rem', borderRadius: '8px', border: '1px solid var(--border-strong)',
+                          background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer',
+                          fontFamily: "'Inter', sans-serif", fontWeight: 500, transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => { (e.target as HTMLButtonElement).style.borderColor = 'var(--amber)'; (e.target as HTMLButtonElement).style.color = 'var(--amber)'; }}
+                        onMouseLeave={e => { (e.target as HTMLButtonElement).style.borderColor = 'var(--border-strong)'; (e.target as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="mt-12 p-6 bg-secondary/5 border border-secondary/20 rounded-sm">
-                 <div className="flex items-center gap-2 mb-3">
-                   <Activity size={14} className="text-secondary" />
-                   <span className="text-[9px] font-bold text-secondary uppercase tracking-[0.2em]">DevOps Relay</span>
-                 </div>
-                 <p className="text-[10px] font-medium leading-relaxed italic text-text-muted">
-                   Pushing this resource will trigger the Kafka event bus across the cluster. Notification workers will broadcast the signature to all connected agents.
-                 </p>
-              </div>
+                {/* Checklist */}
+                <div style={{ background: 'var(--bg-elevated)', borderRadius: '10px', padding: '1.25rem' }}>
+                  <p style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-publish checklist</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {[
+                      { done: title.length >= 3, label: 'Title is at least 3 characters' },
+                      { done: description.length >= 10, label: 'Description is at least 10 characters' },
+                      { done: Number(startingPrice) > 0, label: 'Starting price is greater than $0' },
+                      { done: new Date(endTime) > new Date(), label: 'End time is in the future' },
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '18px', height: '18px', borderRadius: '50%', flexShrink: 0,
+                          background: item.done ? 'var(--emerald)' : 'var(--bg-surface)',
+                          border: `1px solid ${item.done ? 'var(--emerald)' : 'var(--border-strong)'}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s',
+                        }}>
+                          {item.done && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                        </div>
+                        <span style={{ fontSize: '0.82rem', color: item.done ? 'var(--text-secondary)' : 'var(--text-muted)' }}>{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="mt-8">
-                <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full btn-precision h-20 text-[11px] tracking-[0.4em] flex items-center justify-center gap-4 group"
+                {/* Submit */}
+                <button
+                  type="submit" className="btn-primary" disabled={loading || !allFilled}
+                  style={{ height: '52px', fontSize: '1rem', alignSelf: 'flex-start', paddingLeft: '2rem', paddingRight: '2rem' }}
                 >
                   {loading ? (
-                    <span className="animate-pulse">INITIALIZING...</span>
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 0.8s linear infinite' }}>
+                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                      </svg>
+                      Publishing...
+                    </>
                   ) : (
                     <>
-                      <Zap size={18} />
-                      DEPLOY TO CLUSTER
-                      <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/>
+                      </svg>
+                      Publish Listing
                     </>
                   )}
                 </button>
               </div>
-           </div>
-
-           <div className="glass-panel p-8 rounded-lg">
-              <div className="text-[9px] font-bold text-text-muted uppercase tracking-[0.3em] mb-4">Relay Status</div>
-              <div className="flex items-center gap-2">
-                <div className="pulse-live" />
-                <span className="text-[9px] font-bold text-success uppercase font-mono">Upstream Connection Nominal</span>
-              </div>
-           </div>
-        </div>
-      </motion.form>
+            </div>
+          </div>
+        </form>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

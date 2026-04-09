@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-
 import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/context/AuthContext";
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space",
-});
-
 export const metadata: Metadata = {
-  title: "AuctionX | Stellar Precision Bidding",
-  description: "Experience the next generation of real-time digital auctions with ultra-low latency and cyber-luxury design.",
+  title: "AuctionX — Real-Time Bidding Platform",
+  description: "A high-performance, real-time auction platform built on Java microservices with Kafka, PostgreSQL, and Redis.",
 };
 
 export default function RootLayout({
@@ -27,14 +15,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
-        suppressHydrationWarning
-      >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body suppressHydrationWarning>
         <AuthProvider>
-          <div className="bg-stellar-glow" />
           <Navbar />
-          <main className="relative z-10">
+          <main style={{ position: 'relative', zIndex: 1 }}>
             {children}
           </main>
         </AuthProvider>

@@ -4,10 +4,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { auctionApi } from "@/lib/api"
-import { ApiError } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 
-export default function Register() {
+export default function Login() {
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
@@ -21,21 +20,13 @@ export default function Register() {
     setError("")
     setLoading(true)
     try {
-      const userData = await auctionApi.register(username, email)
+      const userData = await auctionApi.loginUser(username, email)
       login(userData)
       setSuccess(true)
       setTimeout(() => router.push("/"), 1500)
     } catch (err: unknown) {
-      if (err instanceof ApiError) {
-        // 409 = explicit conflict; 500 = backend throws on duplicate key (common in Spring Boot)
-        if (err.status === 409 || err.status === 500) {
-          setError('A user with this username or email already exists. Try signing in instead.')
-        } else {
-          setError(err.message || 'Registration failed. Please try again.')
-        }
-      } else {
-        setError('Registration failed. Please try again.')
-      }
+      const msg = err instanceof Error ? err.message : "Login failed. Please check your details."
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -55,22 +46,23 @@ export default function Register() {
             boxShadow: '0 8px 24px rgba(245,158,11,0.3)',
           }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
             </svg>
           </div>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.875rem', letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-            Create Account
+            Welcome Back
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Register to start bidding on live auctions
+            Sign in with your username and email
           </p>
         </div>
 
         {success ? (
           <div className="glass-amber" style={{ borderRadius: '16px', padding: '3rem 2rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎉</div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--amber)', marginBottom: '0.5rem' }}>Welcome aboard!</h2>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👋</div>
+            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--amber)', marginBottom: '0.5rem' }}>You&apos;re in!</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Redirecting you to the auctions...</p>
           </div>
         ) : (
@@ -99,7 +91,6 @@ export default function Register() {
                   minLength={3}
                   autoFocus
                 />
-                <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>Minimum 3 characters</p>
               </div>
 
               <div>
@@ -116,16 +107,21 @@ export default function Register() {
                 />
               </div>
 
-              <div style={{ paddingTop: '0.5rem' }}>
+              {/* Info callout — no passwords in this system */}
+              <div style={{ borderRadius: '10px', padding: '0.875rem 1rem', background: 'var(--blue-dim)', border: '1px solid rgba(59,130,246,0.2)', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                <strong style={{ color: 'var(--text-secondary)' }}>No password?</strong> AuctionX uses username + email as your identity. Make sure they match what you registered with.
+              </div>
+
+              <div style={{ paddingTop: '0.25rem' }}>
                 <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', height: '48px', fontSize: '0.95rem' }}>
                   {loading ? (
                     <>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: 'spin 0.8s linear infinite' }}>
                         <path d="M21 12a9 9 0 11-6.219-8.56"/>
                       </svg>
-                      Creating account...
+                      Signing in...
                     </>
-                  ) : 'Create Account'}
+                  ) : 'Sign In'}
                 </button>
               </div>
             </form>
@@ -133,8 +129,8 @@ export default function Register() {
             <div className="divider" style={{ margin: '1.5rem 0' }} />
 
             <p style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-              Already have an account?{' '}
-              <Link href="/login" style={{ color: 'var(--amber)', fontWeight: 600, textDecoration: 'none' }}>Sign In</Link>
+              New to AuctionX?{' '}
+              <Link href="/register" style={{ color: 'var(--amber)', fontWeight: 600, textDecoration: 'none' }}>Create Account</Link>
             </p>
           </div>
         )}
