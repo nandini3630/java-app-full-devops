@@ -104,7 +104,7 @@ export default function AuctionCard({ id, title, description, currentHighestBid,
             </h3>
           </div>
           <span className={`badge ${isActive ? 'badge-active' : 'badge-ended'}`} style={{ flexShrink: 0 }}>
-            {isActive && <div className="live-dot" style={{ transform: 'scale(0.6)' }} />}
+            {isActive && <span className="live-dot" style={{ transform: 'scale(0.6)' }} />}
             {status}
           </span>
         </div>

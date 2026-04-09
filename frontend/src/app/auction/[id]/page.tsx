@@ -211,7 +211,7 @@ export default function AuctionRoom({ params }: { params: Promise<{ id: string }
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
               <span className="badge badge-amber">LOT #{String(id).padStart(3, '0')}</span>
               <span className={`badge ${isActive ? 'badge-active' : 'badge-ended'}`}>
-                {isActive && <div className="live-dot" style={{ transform: 'scale(0.6)' }} />}
+                {isActive && <span className="live-dot" style={{ transform: 'scale(0.6)' }} />}
                 {auction.status}
               </span>
             </div>
@@ -360,7 +360,7 @@ export default function AuctionRoom({ params }: { params: Promise<{ id: string }
             <div className="glass" style={{ borderRadius: '14px', overflow: 'hidden' }}>
               <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>Live Bid Feed</h3>
-                {isActive && <span className="badge badge-active"><div className="live-dot" style={{ transform: 'scale(0.6)' }} />Streaming</span>}
+                {isActive && <span className="badge badge-active"><span className="live-dot" style={{ transform: 'scale(0.6)' }} />Streaming</span>}
               </div>
               <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                 {bids.length === 0 ? (
