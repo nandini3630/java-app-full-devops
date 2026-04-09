@@ -9,7 +9,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/auctiondb
     username: auctionuser
-    password: auctionpassword
+    password: ${POSTGRES_PASSWORD:auctionpassword}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -26,6 +26,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+      password: ${REDIS_PASSWORD:}
 
   # Kafka Configuration
   kafka:

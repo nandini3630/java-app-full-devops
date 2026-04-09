@@ -77,7 +77,16 @@ public class AuctionController {
     }
 
     @GetMapping("/{id}/bids")
-    public ResponseEntity<java.util.List<com.gravity.auctionx.domain.Bid>> getBids(@PathVariable Long id) {
-        return ResponseEntity.ok(auctionService.getBidHistory(id));
+    public ResponseEntity<java.util.List<com.gravity.auctionx.dto.BidResponse>> getBids(@PathVariable Long id) {
+        java.util.List<com.gravity.auctionx.dto.BidResponse> responses = auctionService.getBidHistory(id).stream()
+                .map(bid -> com.gravity.auctionx.dto.BidResponse.builder()
+                        .auctionItemId(bid.getAuctionItem().getId())
+                        .username(bid.getBidder().getUsername())
+                        .bidAmount(bid.getAmount())
+                        .bidTime(bid.getBidTime())
+                        .status("SUCCESS")
+                        .build())
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 }
