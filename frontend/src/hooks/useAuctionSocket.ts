@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Client } from "@stomp/stompjs"
+// @ts-ignore
 import SockJS from "sockjs-client"
 
 const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws-auction'

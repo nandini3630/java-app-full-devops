@@ -132,7 +132,9 @@ export default function Home() {
                 id={auction.id}
                 title={auction.title}
                 description={auction.description}
-                currentPrice={auction.currentHighestBid}
+                currentHighestBid={auction.currentHighestBid}
+                startingPrice={auction.startingPrice || 0}
+                startTime={auction.startTime || new Date().toISOString()}
                 endTime={auction.endTime}
                 status={auction.status}
               />

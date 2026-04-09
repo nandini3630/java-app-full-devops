@@ -26,6 +26,7 @@ jobs:
         env:
           USERNAME: ${{ vars.DOCKER_USERNAME }}
           GIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          PUB_IP: ${{ secrets.PUB_IP }}
         run: |
           docker compose -f docker-compose.prod.yml down -v
           docker compose -f docker-compose.prod.yml up -d
