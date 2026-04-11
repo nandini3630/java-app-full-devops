@@ -5,6 +5,7 @@ WORKDIR /app
 COPY ./auctionx/pom.xml .
 RUN mvn dependency:go-offline
 
+
 COPY ./auctionx/src ./src
 RUN mvn clean package -DskipTests
 
