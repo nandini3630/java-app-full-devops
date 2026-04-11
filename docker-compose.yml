@@ -20,3 +20,13 @@ services:
       context: .
       dockerfile: DockerFiles/Dockerfile.notification
       target: production
+  
+  auctionx:
+    image: ${USERNAME}/auctionx:${GIT_SHA}
+    build:
+      context: .
+      dockerfile: DockerFiles/Dockerfile.auctionx
+      target: production
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_API_WS_URL: ${NEXT_PUBLIC_API_WS_URL}
