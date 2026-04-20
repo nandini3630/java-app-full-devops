@@ -20,3 +20,11 @@ services:
       context: .
       dockerfile: DockerFiles/Dockerfile.notification
       target: production
+
+
+  frontend:
+    image: ${USERNAME}/frontend:${GIT_SHA}
+    build:
+      context: .
+      dockerfile: Dockerfile/Dockerfile.frontend
+      target: production

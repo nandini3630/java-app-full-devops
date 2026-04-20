@@ -2,7 +2,7 @@ name: Build And Push
 
 on:
   push:
-    branches: ["dev"]
+    branches: ["main"]
 
 jobs:
   build-and-push:
@@ -13,7 +13,7 @@ jobs:
       attestations: write
     strategy:
       matrix:
-        service: [auctionx, payment, notification]
+        service: [auctionx, payment, notification, frontend]
     env:
       GIT_SHA: ${{ github.sha }}
       USERNAME: ${{ vars.DOCKER_USERNAME }}
@@ -48,6 +48,8 @@ jobs:
           build-args: |
             GIT_SHA=${{ github.sha }}
             APP_VERSION=${{ vars.APP_VERSION }}
+            NEXT_PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL  }}
+            NEXT_PUBLIC_WS_URL=${{ secrets.PUBLIC_WS_URL  }}
           sbom: true
           provenance: true
       
