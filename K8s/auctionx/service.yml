@@ -1,0 +1,12 @@
+apiVersion: v1
+Kind: Service
+metadata:
+  name: auctionx-service
+
+spec:
+  type: ClusterIP
+  selector:
+    app: autionx
+  ports:
+    - port: 82
+      targetPort: 8080
