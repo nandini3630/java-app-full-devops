@@ -1,0 +1,24 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: auction-data
+
+---
+
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: auction-apps
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auction-frontend
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auction-backend 

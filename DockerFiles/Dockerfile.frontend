@@ -17,7 +17,10 @@ COPY --from=deps /app/node_modules ./node_modules
 # Build the Next.js app in standalone mode
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_WS_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 
@@ -25,6 +28,12 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+ARG GIT_SHA=unknown \
+    APP_VERSION=unkown
+
+LABEL oci.opencontainers.image.revision=${GIT_SHA} \
+      oci.opencontainers.image.version=${APP_VERSION}
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
