@@ -1,0 +1,7 @@
+apiVersion: v1
+Kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: auction-frontend
+data:
+  NEXT_PUBLIC_API_URL: "https://backend"

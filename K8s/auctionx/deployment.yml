@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+Kind: Deployment
+metadata:
+  name: autionx
+  namespace: auction-backend
+  labels:
+    app: autionx
+
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: autionx
+  template:
+    metadata:
+      labels:
+        app: autionx
+    spec:
+    containers:
+      - name: autionx
+        image:
+
+        ports:
+          - containersPort: 8080
+        resource:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        env:
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx512m"
