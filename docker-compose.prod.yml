@@ -176,22 +176,22 @@ services:
           memory: 512M
           pids: 100
 
-  # frontend:
-  #   image: ${USERNAME}/frontend:${GIT_SHA}
-  #   container_name: frontend
-  #   restart: unless-stopped
-  #   ports:
-  #     - 3000:3000
-  #   security_opt:
-  #     - no-new-privileges=true
-  #   networks:
-  #     - app-net
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '1.0'
-  #         memory: 512M
-  #         pids: 100
+  frontend:
+    image: ${USERNAME}/frontend:${GIT_SHA}
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    security_opt:
+      - no-new-privileges=true
+    networks:
+      - app-net
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+          pids: 100
 
 networks:
   app-net:
