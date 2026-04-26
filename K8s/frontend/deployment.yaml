@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+Kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+       - name: frontend
+         image:
+
+         ports:
+          - containerPort: 3000
+         env:
+          - name: NEXT_PUBLIC_API_URL
+            valueFrom:
+            configMapKeyRef:
+                name: frontend-config
+                key: a
+
+         resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
