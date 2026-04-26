@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: payment-service
+  namespace: auction-backend
+type: NodePort
+ports:
+  - port: 8081
+    targetPort: 8081
+    NodePort: 30081

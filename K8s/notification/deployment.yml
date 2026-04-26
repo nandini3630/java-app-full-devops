@@ -1,0 +1,36 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: notification-dep
+  namespace: auction-backend
+  labels:
+    app: notification
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      name: notification
+      labels:
+        app: notification
+    spec: 
+      containers:
+        - 
+          name: notification
+          image: vishu0210/notification:latest
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: notification-configs
+          resources:
+            requests:
+              cpus: '0.5'
+              memory: 256Mi
+            limits:
+              cpus: '1.5'
+              memory: 512Mi
+      
+        

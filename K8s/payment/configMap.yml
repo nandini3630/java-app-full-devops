@@ -1,0 +1,9 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: payment-configmap
+  namespace: auction-backend
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auctiondb
+  SPRING_DATASOURCE_USERNAME: auctionuser
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka.auction-data.svc.cluster.local:9092
