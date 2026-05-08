@@ -1,0 +1,114 @@
+# =========================
+# OS / Editor
+# =========================
+.DS_Store
+Thumbs.db
+
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+*.out
+*.err
+
+# =========================
+# Java / Spring Boot
+# =========================
+target/
+build/
+out/
+
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+
+# Spring Boot
+spring.log
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+application-local.yml
+application-local.yaml
+application-prod.yml
+application-prod.yaml
+
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# =========================
+# Docker
+# =========================
+docker-data/
+postgres-data/
+redis-data/
+kafka-data/
+zookeeper-data/
+
+# Docker Compose override
+docker-compose.override.yml
+
+# =========================
+# Kafka / Zookeeper
+# =========================
+tmp/
+data/
+logs/
+
+# =========================
+# Redis
+# =========================
+dump.rdb
+appendonly.aof
+
+# =========================
+# Mailpit
+# =========================
+mailpit-data/
+
+# =========================
+# Test / Coverage
+# =========================
+coverage/
+jacoco.exec
+/site/jacoco/
+.surefire-*
+failsafe-reports/
+
+# =========================
+# Node (Frontend if added later)
+# =========================
+node_modules/
+dist/
+.next/
+.cache/
+
+# =========================
+# Misc
+# =========================
+*.swp
+*.swo
+*~

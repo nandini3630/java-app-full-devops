@@ -1,0 +1,87 @@
+
+# =========================
+# Git
+# =========================
+.git
+.gitignore
+
+# =========================
+# IDE / Editors
+# =========================
+.idea
+.vscode
+*.iml
+
+# =========================
+# Build Output
+# =========================
+target
+build
+out
+
+# =========================
+# Logs
+# =========================
+*.log
+logs
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# =========================
+# Docker Runtime Volumes
+# =========================
+postgres-data
+redis-data
+kafka-data
+zookeeper-data
+mailpit-data
+docker-data
+
+# =========================
+# Tests / Coverage
+# =========================
+coverage
+jacoco.exec
+site
+
+# =========================
+# Node Modules
+# =========================
+node_modules
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temp Files
+# =========================
+tmp
+*.swp
+*.swo
+*~
+
+# =========================
+# Documentation
+# =========================
+README.md
+docs/
+
+# =========================
+# Local Compose Overrides
+# =========================
+docker-compose.override.yml
